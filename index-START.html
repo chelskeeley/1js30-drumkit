@@ -58,7 +58,44 @@
   <audio data-key="76" src="sounds/tink.wav"></audio>
 
 <script>
+    //this function used as a callback fucntion in the window.eventListener at the bottom
+    function playSound(e){
+        //will show us the keyDown event, then the code that is connected with each keyboard key
+        // console.log(e.keyCode);
+        //looking for an audio element on the page (using querySelector) that has a data-key attribute matched the key that is being pressed
+        //use a template string to pass in a variable instead of writing out for each!
+        const audio = document.querySelector(`audio[data-key='${e.keyCode}']`);
+        //we also need to select the corresponding element with the class of key that has the matching data-key attribute to be able to trigger the css animation
+        const key = document.querySelector(`.key[data-key='${e.keyCode}']`);
+        //if we console log audio, it will show us the audio element related to the key we pressed!
+        // console.log(audio);
+        //BUT if we press a key that is not connected with an audio element, we get null, so lets write an if statement that will stop the function from running altogether if this happens
+        if(!audio) return;
+        //now we can play the audio element
+        //now if we hit (for example) the 'f' key over and over, it only plays once every three presses or so, because the audio file is a couple seconds long, and if we call the play() function on an audio file that is already playing, it wont play it again because it is already playing. So we can go back and kind of rewind it to the start of the audio with each press
+        audio.currentTime = 0;
+        audio.play();
+        //this adds the class of 'playing' to the key that is being pressed, to style if differently so you can see what is being pressed visually on the page (this is similar to doing addClass in jQuery, also can remove and toggle!)
+        key.classList.add('playing');
+        //now it is adding the class, but the element on the page isn't returning to initial state after the button is released. instead of using a set timeout function(this may fight with the timer we already have on the transition in the css file), we will use a transition end event that will fire after the element has stopped animating itself in. Lets go outside this function to add an event listener for the transition end
 
+    };
+
+    function removeTransition(e){
+        //we will see with this console.log that we will get 6 things in the console when we press one key, because 6 things are transitioning (border,color etc. look at the propertyName)
+        // console.log(e);
+        //lets write an if statement that return us out of the function unless the transition is specifically 'transform'
+        if(e.propertyName !== 'transform') return;
+        //this log will show the property name that is ending!
+        // console.log(e.propertyName);
+        //this keyword refers to 'key', because look at line 97ish, removeTransition is a call back on an event listener that is attached to 'key'
+        this.classList.remove('playing');
+    }
+    //select for all keys on the page, so we are using query selector all for a class of key
+    const keys = document.querySelectorAll('.key');
+    //loop through each div inside of keys div and attach an event listener to each one
+    keys.forEach(key => key.addEventListener('transitionend', removeTransition));
+    window.addEventListener('keydown', playSound);
 </script>
 
 
